@@ -11,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 from whitenoise import WhiteNoise
 from .middleware import Middleware
 from .response import Response
-from .utils import render_markdown, get_previous_link, get_next_link
+import markdown
 
 class API:
     def __init__(self, templates_dir="templates", static_dir="static"):
@@ -109,9 +109,12 @@ class API:
 
         # Check if the file ends with .md extension
         if template_name.endswith('.md'):
-            rendered_template = render_markdown(rendered_template)
-            context["get_previous_link"] = get_previous_link
-            context["get_next_link"] = get_next_link
+            # Convert the rendered template to HTML using Markdown
+            converted_html = markdown.markdown(rendered_template, extensions=['fenced_code', 'codehilite', 'tables'])
+            css_path = os.path.join(os.path.dirname(__file__), 'static/styles.css')
+            with open(css_path, encoding="utf16") as css_file:
+                css_content = css_file.read()
+            rendered_template = f"<style>{css_content}</style>{converted_html}"
         
         return rendered_template
     
